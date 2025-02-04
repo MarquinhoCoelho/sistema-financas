@@ -1,7 +1,13 @@
 import { fastify } from 'fastify';
 import cors from '@fastify/cors';
+import postgres from 'postgres';
 import { randomUUID } from "crypto";
-import { sql } from './db.js';
+import dotenv from 'dotenv';
+
+dotenv.config(); // Carregar variáveis de ambiente localmente
+
+// Conectar ao banco de dados PostgreSQL (local ou Neon)
+const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' });
 
 const server = fastify();
 
@@ -16,7 +22,6 @@ server.post('/gasto', async (request, reply) => {
     const { descricao, valor, data } = request.body;
     const id = randomUUID();
     
-    // Converter data para o formato correto (YYYY-MM-DD)
     const dataFormatada = new Date(data).toISOString().split('T')[0];
 
     await sql`
@@ -71,10 +76,10 @@ server.get('/total-gastos/:ano/:mes', async (request) => {
     return result[0];
 });
 
-server.listen({ port: 3000 }, (err, address) => {
+server.listen({ port: process.env.PORT || 3000 }, (err, address) => {
     if (err) {
         console.error(err);
         process.exit(1);
     }
-    console.log(`🚀 Servidor rodando em ${address}`);
+    console.log(`🚀 Servidor rodando na porta ${process.env.PORT || 3000}`);
 });

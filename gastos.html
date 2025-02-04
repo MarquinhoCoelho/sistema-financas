@@ -52,6 +52,9 @@
     </div>
 
     <script>
+        // Definir a URL da API do Render
+        const API_URL = "https://sistema-financas.onrender.com"; // Substitua pela URL do seu backend no Render
+
         document.getElementById('back').addEventListener('click', () => {
             window.location.href = 'index.html';
         });
@@ -72,17 +75,17 @@
 
             try {
                 // Buscar total de gastos do mês
-                const totalMesResponse = await fetch(`http://localhost:3000/total-gastos/${ano}/${mes}`);
+                const totalMesResponse = await fetch(`${API_URL}/total-gastos/${ano}/${mes}`);
                 const totalMesData = await totalMesResponse.json();
                 document.getElementById('total-mes').textContent = `R$ ${totalMesData.total ? parseFloat(totalMesData.total).toFixed(2) : '0,00'}`;
 
                 // Buscar total de gastos do ano
-                const totalAnoResponse = await fetch(`http://localhost:3000/total-gastos/${ano}`);
+                const totalAnoResponse = await fetch(`${API_URL}/total-gastos/${ano}`);
                 const totalAnoData = await totalAnoResponse.json();
                 document.getElementById('total-ano').textContent = `R$ ${totalAnoData.total ? parseFloat(totalAnoData.total).toFixed(2) : '0,00'}`;
 
                 // Buscar lista de gastos do mês
-                const gastosResponse = await fetch(`http://localhost:3000/gastos/${ano}/${mes}`);
+                const gastosResponse = await fetch(`${API_URL}/gastos/${ano}/${mes}`);
                 const gastos = await gastosResponse.json();
 
                 const listaGastos = document.getElementById('lista-gastos');
@@ -107,7 +110,7 @@
         // Buscar dados iniciais para depuração
         async function carregarGastos() {
             try {
-                const response = await fetch(`http://localhost:3000/gastos`);
+                const response = await fetch(`${API_URL}/gastos`);
                 const dados = await response.json();
                 console.log('Gastos carregados:', dados);
             } catch (error) {

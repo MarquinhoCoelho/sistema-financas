@@ -33,12 +33,15 @@
     </div>
     
     <script>
+        // Definir a URL da API do Render
+        const API_URL = "https://sistema-financas.onrender.com"; // Substitua pela sua URL do backend no Render
+
         document.getElementById('gasto-form').addEventListener('submit', async function(event) {
             event.preventDefault();
             
             const descricao = document.getElementById('descricao').value.trim();
             const valor = parseFloat(document.getElementById('valor').value);
-            const data = document.getElementById('data').value; // Pegando a data do input
+            const data = document.getElementById('data').value;
 
             if (!descricao || isNaN(valor) || !data) {
                 document.getElementById('mensagem').textContent = '⚠️ Preencha todos os campos corretamente!';
@@ -49,11 +52,9 @@
             const gasto = { descricao, valor, data };
 
             try {
-                const response = await fetch('http://localhost:3000/gasto', {
+                const response = await fetch(`${API_URL}/gasto`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(gasto)
                 });
 
@@ -63,12 +64,13 @@
                     document.getElementById('mensagem').classList.add('text-green-600');
                     document.getElementById('gasto-form').reset();
                 } else {
-                    document.getElementById('mensagem').textContent = '⚠️ Erro ao salvar gasto.';
+                    const errorData = await response.json();
+                    document.getElementById('mensagem').textContent = `⚠️ Erro: ${errorData.message || 'Erro ao salvar gasto.'}`;
                     document.getElementById('mensagem').classList.add('text-red-600');
                 }
             } catch (error) {
                 console.error('Erro:', error);
-                document.getElementById('mensagem').textContent = '🚫 Erro de conexão.';
+                document.getElementById('mensagem').textContent = '🚫 Erro de conexão com o servidor.';
                 document.getElementById('mensagem').classList.add('text-red-600');
             }
         });
@@ -76,6 +78,9 @@
         document.getElementById('open-menu').addEventListener('click', function() {
             window.location.href = 'gastos.html';
         });
+
+        // Preencher o campo de data com a data de hoje automaticamente
+        document.getElementById('data').valueAsDate = new Date();
     </script>
 </body>
 </html>
