@@ -76,7 +76,7 @@ server.get('/total-gastos/:ano/:mes', async (request) => {
     return result[0];
 });
 
-server.listen({ port: process.env.PORT || 3000 }, (err, address) => {
+server.listen({ port: process.env.PORT || 3000, host: '0.0.0.0' }, (err, address) => {
     if (err) {
         console.error(err);
         process.exit(1);
