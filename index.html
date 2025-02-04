@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador Financeiro</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm relative">
+        <button id="open-menu" class="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-2 rounded-md">📊 Gastos</button>
+        
+        <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Registrar Gasto</h2>
+        <form id="gasto-form" class="space-y-4">
+            <div>
+                <label for="descricao" class="block text-sm font-medium text-gray-700">Descrição:</label>
+                <input type="text" id="descricao" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-lg">
+            </div>
+            
+            <div>
+                <label for="valor" class="block text-sm font-medium text-gray-700">Valor (R$):</label>
+                <input type="number" id="valor" step="0.01" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-lg">
+            </div>
+
+            <div>
+                <label for="data" class="block text-sm font-medium text-gray-700">Data:</label>
+                <input type="date" id="data" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-lg">
+            </div>
+            
+            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-lg font-semibold">Salvar Gasto</button>
+        </form>
+        <p id="mensagem" class="mt-4 text-center text-sm text-gray-600"></p>
+    </div>
+    
+    <script>
+        document.getElementById('gasto-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const descricao = document.getElementById('descricao').value.trim();
+            const valor = parseFloat(document.getElementById('valor').value);
+            const data = document.getElementById('data').value; // Pegando a data do input
+
+            if (!descricao || isNaN(valor) || !data) {
+                document.getElementById('mensagem').textContent = '⚠️ Preencha todos os campos corretamente!';
+                document.getElementById('mensagem').classList.add('text-red-600');
+                return;
+            }
+
+            const gasto = { descricao, valor, data };
+
+            try {
+                const response = await fetch('http://localhost:3000/gasto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(gasto)
+                });
+
+                if (response.ok) {
+                    document.getElementById('mensagem').textContent = '✅ Gasto salvo com sucesso!';
+                    document.getElementById('mensagem').classList.remove('text-red-600');
+                    document.getElementById('mensagem').classList.add('text-green-600');
+                    document.getElementById('gasto-form').reset();
+                } else {
+                    document.getElementById('mensagem').textContent = '⚠️ Erro ao salvar gasto.';
+                    document.getElementById('mensagem').classList.add('text-red-600');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                document.getElementById('mensagem').textContent = '🚫 Erro de conexão.';
+                document.getElementById('mensagem').classList.add('text-red-600');
+            }
+        });
+
+        document.getElementById('open-menu').addEventListener('click', function() {
+            window.location.href = 'gastos.html';
+        });
+    </script>
+</body>
+</html>

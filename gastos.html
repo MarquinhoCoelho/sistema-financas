@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Gastos</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+        <button id="back" class="bg-gray-600 text-white px-3 py-2 rounded-md mb-4">⬅ Voltar</button>
+
+        <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Gastos Mensais</h2>
+
+        <div class="mb-4">
+            <label for="ano" class="block text-sm font-medium text-gray-700">Selecione o Ano:</label>
+            <select id="ano" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm"></select>
+        </div>
+
+        <div class="mb-4">
+            <label for="mes" class="block text-sm font-medium text-gray-700">Selecione o Mês:</label>
+            <select id="mes" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm">
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+        </div>
+
+        <button id="buscar" class="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition duration-300 ease-in-out text-lg font-semibold">Buscar</button>
+
+        <div class="mt-6">
+            <h3 class="text-xl font-bold text-gray-700">Resumo</h3>
+            <p class="text-lg text-gray-800">💰 Total gasto no mês: <span id="total-mes" class="font-bold text-red-600">R$ 0,00</span></p>
+            <p class="text-lg text-gray-800">📅 Total gasto no ano: <span id="total-ano" class="font-bold text-red-600">R$ 0,00</span></p>
+        </div>
+
+        <div class="mt-6">
+            <h3 class="text-xl font-bold text-gray-700">Detalhes dos Gastos</h3>
+            <ul id="lista-gastos" class="mt-2 space-y-2">
+                <li class="text-gray-600">Nenhum gasto encontrado.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('back').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        // Preencher o select de anos
+        const anoSelect = document.getElementById('ano');
+        const anoAtual = new Date().getFullYear();
+        for (let i = anoAtual; i >= anoAtual - 10; i--) {
+            let option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            anoSelect.appendChild(option);
+        }
+
+        document.getElementById('buscar').addEventListener('click', async function() {
+            const ano = document.getElementById('ano').value;
+            const mes = document.getElementById('mes').value;
+
+            try {
+                // Buscar total de gastos do mês
+                const totalMesResponse = await fetch(`http://localhost:3000/total-gastos/${ano}/${mes}`);
+                const totalMesData = await totalMesResponse.json();
+                document.getElementById('total-mes').textContent = `R$ ${totalMesData.total ? parseFloat(totalMesData.total).toFixed(2) : '0,00'}`;
+
+                // Buscar total de gastos do ano
+                const totalAnoResponse = await fetch(`http://localhost:3000/total-gastos/${ano}`);
+                const totalAnoData = await totalAnoResponse.json();
+                document.getElementById('total-ano').textContent = `R$ ${totalAnoData.total ? parseFloat(totalAnoData.total).toFixed(2) : '0,00'}`;
+
+                // Buscar lista de gastos do mês
+                const gastosResponse = await fetch(`http://localhost:3000/gastos/${ano}/${mes}`);
+                const gastos = await gastosResponse.json();
+
+                const listaGastos = document.getElementById('lista-gastos');
+                listaGastos.innerHTML = '';
+
+                if (gastos.length > 0) {
+                    gastos.forEach(gasto => {
+                        const li = document.createElement('li');
+                        li.classList.add('text-gray-800', 'border-b', 'py-2');
+                        li.textContent = `📌 ${gasto.descricao} - R$ ${parseFloat(gasto.valor).toFixed(2)} - 📅 ${new Date(gasto.data).toLocaleDateString('pt-BR')}`;
+                        listaGastos.appendChild(li);
+                    });
+                } else {
+                    listaGastos.innerHTML = '<li class="text-gray-600">Nenhum gasto encontrado.</li>';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                alert('Erro ao buscar os gastos. Verifique a conexão com o servidor.');
+            }
+        });
+
+        // Buscar dados iniciais para depuração
+        async function carregarGastos() {
+            try {
+                const response = await fetch(`http://localhost:3000/gastos`);
+                const dados = await response.json();
+                console.log('Gastos carregados:', dados);
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+
+        carregarGastos();
+    </script>
+</body>
+</html>
