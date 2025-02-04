@@ -37,11 +37,13 @@
 
         <button id="buscar" class="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition duration-300 ease-in-out text-lg font-semibold">Buscar</button>
 
-        <div class="mt-6">
+        <div class="mt-6 flex justify-between">
             <h3 class="text-xl font-bold text-gray-700">Resumo</h3>
-            <p class="text-lg text-gray-800">💰 Total gasto no mês: <span id="total-mes" class="font-bold text-red-600">R$ 0,00</span></p>
-            <p class="text-lg text-gray-800">📅 Total gasto no ano: <span id="total-ano" class="font-bold text-red-600">R$ 0,00</span></p>
+            <button id="deletar-tudo" class="bg-red-600 text-white px-3 py-2 rounded-md text-sm hover:bg-red-700 transition">🗑️ Deletar Tudo</button>
         </div>
+
+        <p class="text-lg text-gray-800">💰 Total gasto no mês: <span id="total-mes" class="font-bold text-red-600">R$ 0,00</span></p>
+        <p class="text-lg text-gray-800">📅 Total gasto no ano: <span id="total-ano" class="font-bold text-red-600">R$ 0,00</span></p>
 
         <div class="mt-6">
             <h3 class="text-xl font-bold text-gray-700">Detalhes dos Gastos</h3>
@@ -52,14 +54,12 @@
     </div>
 
     <script>
-        // Definir a URL da API do Render
-        const API_URL = "https://sistema-financas.onrender.com"; // Substitua pela URL do seu backend no Render
+        const API_URL = "https://sistema-financas.onrender.com"; 
 
         document.getElementById('back').addEventListener('click', () => {
             window.location.href = 'index.html';
         });
 
-        // Preencher o select de anos
         const anoSelect = document.getElementById('ano');
         const anoAtual = new Date().getFullYear();
         for (let i = anoAtual; i >= anoAtual - 10; i--) {
@@ -74,17 +74,14 @@
             const mes = document.getElementById('mes').value;
 
             try {
-                // Buscar total de gastos do mês
                 const totalMesResponse = await fetch(`${API_URL}/total-gastos/${ano}/${mes}`);
                 const totalMesData = await totalMesResponse.json();
                 document.getElementById('total-mes').textContent = `R$ ${totalMesData.total ? parseFloat(totalMesData.total).toFixed(2) : '0,00'}`;
 
-                // Buscar total de gastos do ano
                 const totalAnoResponse = await fetch(`${API_URL}/total-gastos/${ano}`);
                 const totalAnoData = await totalAnoResponse.json();
                 document.getElementById('total-ano').textContent = `R$ ${totalAnoData.total ? parseFloat(totalAnoData.total).toFixed(2) : '0,00'}`;
 
-                // Buscar lista de gastos do mês
                 const gastosResponse = await fetch(`${API_URL}/gastos/${ano}/${mes}`);
                 const gastos = await gastosResponse.json();
 
@@ -94,8 +91,9 @@
                 if (gastos.length > 0) {
                     gastos.forEach(gasto => {
                         const li = document.createElement('li');
-                        li.classList.add('text-gray-800', 'border-b', 'py-2');
-                        li.textContent = `📌 ${gasto.descricao} - R$ ${parseFloat(gasto.valor).toFixed(2)} - 📅 ${new Date(gasto.data).toLocaleDateString('pt-BR')}`;
+                        li.classList.add('text-gray-800', 'border-b', 'py-2', 'flex', 'justify-between', 'items-center');
+                        li.innerHTML = `📌 ${gasto.descricao} - R$ ${parseFloat(gasto.valor).toFixed(2)} - 📅 ${new Date(gasto.data).toLocaleDateString('pt-BR')}
+                            <button class="bg-red-500 text-white px-2 py-1 text-xs rounded-md hover:bg-red-700 transition" onclick="deletarGasto('${gasto.id}')">🗑️</button>`;
                         listaGastos.appendChild(li);
                     });
                 } else {
@@ -107,18 +105,43 @@
             }
         });
 
-        // Buscar dados iniciais para depuração
-        async function carregarGastos() {
+        async function deletarGasto(id) {
+            if (!confirm("Tem certeza que deseja deletar este gasto?")) return;
+
             try {
-                const response = await fetch(`${API_URL}/gastos`);
-                const dados = await response.json();
-                console.log('Gastos carregados:', dados);
+                const response = await fetch(`${API_URL}/gasto/${id}`, { method: 'DELETE' });
+
+                if (response.ok) {
+                    alert("Gasto deletado com sucesso!");
+                    document.getElementById('buscar').click();
+                } else {
+                    alert("Erro ao deletar o gasto.");
+                }
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
+                console.error('Erro ao deletar gasto:', error);
+                alert('Erro de conexão ao tentar deletar.');
             }
         }
 
-        carregarGastos();
+        document.getElementById('deletar-tudo').addEventListener('click', async function() {
+            if (!confirm("Tem certeza que deseja deletar TODOS os gastos?")) return;
+
+            try {
+                const response = await fetch(`${API_URL}/gastos`, { method: 'DELETE' });
+
+                if (response.ok) {
+                    alert("Todos os gastos foram deletados com sucesso!");
+                    document.getElementById('lista-gastos').innerHTML = '<li class="text-gray-600">Nenhum gasto encontrado.</li>';
+                    document.getElementById('total-mes').textContent = 'R$ 0,00';
+                    document.getElementById('total-ano').textContent = 'R$ 0,00';
+                } else {
+                    alert("Erro ao deletar os gastos.");
+                }
+            } catch (error) {
+                console.error('Erro ao deletar todos os gastos:', error);
+                alert('Erro de conexão ao tentar deletar.');
+            }
+        });
     </script>
 </body>
 </html>

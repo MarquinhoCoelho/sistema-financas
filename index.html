@@ -8,9 +8,11 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm relative">
-        <button id="open-menu" class="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-2 rounded-md">📊 Gastos</button>
+        <div style="display: flex; justify-content: space-between; width: 100%;">
+            <button id="open-menu" class="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-2 rounded-md">📊 Gastos</button>
+            <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Registrar Gasto</h2>
+        </div>
         
-        <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Registrar Gasto</h2>
         <form id="gasto-form" class="space-y-4">
             <div>
                 <label for="descricao" class="block text-sm font-medium text-gray-700">Descrição:</label>

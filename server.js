@@ -76,6 +76,29 @@ server.get('/total-gastos/:ano/:mes', async (request) => {
     return result[0];
 });
 
+// Rota para deletar um gasto específico pelo ID
+server.delete('/gasto/:id', async (request, reply) => {
+    const { id } = request.params;
+
+    const result = await sql`
+        DELETE FROM gastos WHERE id = ${id} RETURNING *
+    `;
+
+    if (result.length === 0) {
+        return reply.status(404).send({ message: '❌ Gasto não encontrado.' });
+    }
+
+    return reply.status(200).send({ message: '🗑️ Gasto deletado com sucesso!', deleted: result[0] });
+});
+
+// Rota para deletar todos os gastos
+server.delete('/gastos', async (request, reply) => {
+    await sql`DELETE FROM gastos`;
+
+    return reply.status(200).send({ message: '🗑️ Todos os gastos foram deletados com sucesso!' });
+});
+
+// Iniciar o servidor
 server.listen({ port: process.env.PORT || 3000, host: '0.0.0.0' }, (err, address) => {
     if (err) {
         console.error(err);
